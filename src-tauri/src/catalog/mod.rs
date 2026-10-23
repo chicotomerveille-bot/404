@@ -1,11 +1,17 @@
 //! The bundled, offline model catalog.
 //!
-//! `catalog.json` is a verbatim copy of the `@handy-computer/models` package's
-//! catalog (the version pinned in `package.json`; `bun run check:catalog`
-//! keeps the two identical). It lists every model transcribe.cpp publishes,
-//! with pinned revisions, per-quant hashes and benchmark results, and marks
-//! the curated subset. It is compiled into the binary so Handy ships a
-//! complete model list with zero network access.
+//! `catalog.json` starts as a copy of the `@handy-computer/models` package's
+//! catalog (the version pinned in `package.json`) and adds 404's own entries:
+//! three Whisper models hosted on this repository's `models-v1` release, each
+//! carrying a direct `url` in its default file. Because they are ordinary
+//! catalog entries they rank, badge and appear in onboarding like any other —
+//! the only difference is where the bytes come from. The file is no longer kept
+//! byte-identical to the package (`check:catalog` is therefore not run in CI).
+//!
+//! It lists every model transcribe.cpp publishes, with pinned revisions,
+//! per-quant hashes and benchmark results, and marks the curated subset. It is
+//! compiled into the binary so 404 ships a complete model list with zero
+//! network access.
 //!
 //! Every supported transcription model is offered for download and mirrored
 //! at the package's default quant, independently of recommendation ranking.
@@ -35,21 +41,26 @@ const SCHEMA: u32 = 2;
 /// `scripts/mirror_models.py` populates it from this catalog.
 const MIRRORS: &[&str] = &["https://blob.handy.computer"];
 
-/// Handy's list order and onboarding set, keyed by catalog id. Kept from the
-/// previous generator until onboarding moves to the package's recommendations.
+/// 404's list order and onboarding set, keyed by catalog id. Our own three
+/// models lead the list and are the only ones badged "Recommended", so
+/// onboarding offers exactly the French dictation ladder; the upstream models
+/// stay available below them for anyone who wants something else.
 /// `(id, rank, recommended)`: rank is the editorial sort position (lower =
 /// higher); recommended is the small badged onboarding subset.
 const HANDY_RANKING: &[(&str, u32, bool)] = &[
-    ("parakeet-unified-en-0.6b", 1, true),
-    ("nemotron-3.5-asr-streaming-0.6b", 2, true),
-    ("canary-180m-flash", 3, true),
-    ("cohere-transcribe-03-2026", 4, true),
-    ("whisper-medium", 5, true),
-    ("Voxtral-Mini-4B-Realtime-2602", 6, false),
-    ("parakeet-tdt-0.6b-v3", 7, false),
-    ("parakeet-tdt-0.6b-v2", 8, false),
-    ("Qwen3-ASR-0.6B", 9, false),
-    ("Fun-ASR-MLT-Nano-2512", 10, false),
+    ("four04-small", 1, true),
+    ("four04-turbo", 2, true),
+    ("four04-base", 3, true),
+    ("parakeet-unified-en-0.6b", 4, false),
+    ("nemotron-3.5-asr-streaming-0.6b", 5, false),
+    ("canary-180m-flash", 6, false),
+    ("cohere-transcribe-03-2026", 7, false),
+    ("whisper-medium", 8, false),
+    ("Voxtral-Mini-4B-Realtime-2602", 9, false),
+    ("parakeet-tdt-0.6b-v3", 10, false),
+    ("parakeet-tdt-0.6b-v2", 11, false),
+    ("Qwen3-ASR-0.6B", 12, false),
+    ("Fun-ASR-MLT-Nano-2512", 13, false),
 ];
 
 #[derive(Deserialize)]
@@ -110,6 +121,12 @@ struct CatalogFile {
     filename: String,
     size: u64,
     sha256: String,
+    /// Optional direct download URL. When the default file carries one, the
+    /// entry is acquired from there instead of Hugging Face — how 404 hosts its
+    /// own weights on a GitHub release while still being a normal catalog entry
+    /// (ranked, badged, listed in onboarding).
+    #[serde(default)]
+    url: Option<String>,
 }
 
 #[derive(Deserialize, Default)]
@@ -273,14 +290,29 @@ impl From<&CatalogModel> for ModelDescriptor {
         let ranking = HANDY_RANKING.iter().find(|(id, _, _)| *id == m.id);
         let results = ROOT.results.get(&m.id);
 
-        ModelDescriptor {
-            id: format!("{}/{}", m.repository, default_filename),
-            source: ModelSource::HuggingFace {
+        // A catalog entry may point at a direct URL (404's own release assets)
+        // instead of Hugging Face. The catalog's hash stays the trust anchor
+        // either way, so the download is verified identically.
+        let source = match m.default_file() {
+            Some(CatalogFile {
+                url: Some(url),
+                sha256,
+                ..
+            }) => ModelSource::Url {
+                url: url.clone(),
+                sha256: Some(sha256.clone()),
+            },
+            _ => ModelSource::HuggingFace {
                 repo_id: m.repository.clone(),
                 // Acquire at the pin: `resolve/<sha>` is immutable (CDN-friendly)
                 // and guarantees the bytes match the catalog's hashes.
                 revision: m.revision.clone(),
             },
+        };
+
+        ModelDescriptor {
+            id: format!("{}/{}", m.repository, default_filename),
+            source,
             name: m.name.clone(),
             description: if m.description.is_empty() {
                 generated_description(m)

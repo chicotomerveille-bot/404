@@ -342,7 +342,7 @@ const ModelMigration: React.FC<ModelMigrationProps> = ({
             )}
             {timeLeft && speed > 0 && (
               <span className="text-text/30" aria-hidden="true">
-                ·
+                Â·
               </span>
             )}
             {speed > 0 && (
@@ -446,7 +446,7 @@ const MigrationRow: React.FC<MigrationRowProps> = ({
         <span
           role="img"
           aria-label={t("modelSelector.modelReady")}
-          className="grid place-items-center w-[22px] h-[22px] rounded-full bg-emerald-500/20 text-emerald-500"
+          className="grid place-items-center w-[22px] h-[22px] rounded-full bg-logo-primary/10 text-logo-primary"
         >
           <Check className="w-3 h-3" strokeWidth={3} />
         </span>

@@ -1,31 +1,33 @@
-/* Handy Colors */
+/* 404 — monochrome palette
+ *
+ * Black and white only: no hue anywhere in the brand surface. Each themed
+ * color is defined once as a light/dark pair; the active tokens below and the
+ * `data-theme` overrides reference these, so a hex value lives in exactly one
+ * place.
+ */
 
 :root {
-  /* Palette source of truth. Each themed color is defined once as a
-     light/dark pair; the active tokens below and the `data-theme` overrides
-     in App.css reference these, so a hex value lives in exactly one place. */
-  --light-color-text: #0f0f0f;
-  --light-color-background: #fbfbfb;
-  --light-color-logo-primary: #faa2ca;
-  --light-color-logo-stroke: #382731;
+  --light-color-text: #0a0a0a;
+  --light-color-background: #ffffff;
+  --light-color-logo-primary: #0a0a0a;
+  --light-color-logo-stroke: #0a0a0a;
 
-  --dark-color-text: #fbfbfb;
-  --dark-color-background: #2c2b29;
-  --dark-color-logo-primary: #f28cbb;
-  --dark-color-logo-stroke: #fad1ed;
+  --dark-color-text: #fafafa;
+  --dark-color-background: #0a0a0a;
+  --dark-color-logo-primary: #fafafa;
+  --dark-color-logo-stroke: #fafafa;
 
-  /* Semantic status colors. First used by SecureInputWarning; intended to
-     replace the ad-hoc yellow-500/red-500 usages (e.g. ui/Alert.tsx) over
-     time so status styling is themeable from one place. */
-  --light-color-warning: #d97706;
-  --light-color-error: #dc2626;
-  --dark-color-warning: #fbbf24;
-  --dark-color-error: #f87171;
+  /* Semantic status colors. The only hues left in the product: they carry
+     meaning (a failure is red, a warning is amber) and never decorate. */
+  --light-color-warning: #8a6d00;
+  --light-color-error: #b3261e;
+  --dark-color-warning: #e5c07b;
+  --dark-color-error: #f2b8b5;
 
   /* Tokens that do not change between light and dark */
-  --color-background-ui: #da5893;
-  --color-text-stroke: #f6f6f6;
-  --color-mid-gray: #808080;
+  --color-background-ui: #0a0a0a;
+  --color-text-stroke: #ffffff;
+  --color-mid-gray: #8a8a8a;
 
   /* Active palette — defaults to light, follows the OS via the media query
      below, or is forced by `data-theme` (see the overrides below). */
@@ -52,7 +54,7 @@
  * Explicit theme override, driven by the `theme` setting via
  * `document.documentElement.dataset.theme`. When set, the higher-specificity
  * attribute selectors win over the `prefers-color-scheme` media query above,
- * so a user can keep Handy light or dark regardless of the OS setting.
+ * so a user can keep 404 light or dark regardless of the OS setting.
  * `system` (or no attribute) leaves the OS in charge.
  *
  * Lives here (not in App.css) so every window that imports the shared palette —

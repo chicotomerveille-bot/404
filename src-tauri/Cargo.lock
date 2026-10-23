@@ -2459,7 +2459,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "handy"
+name = "four04"
 version = "0.9.8"
 dependencies = [
  "anyhow",

@@ -580,7 +580,10 @@ fn default_whats_new_last_seen_version() -> String {
 }
 
 fn default_selected_language() -> String {
-    "auto".to_string()
+    // 404 is a French dictation app: pin the language instead of asking
+    // Whisper to auto-detect on every utterance (detection is unreliable on
+    // the short clips dictation produces, and French is the whole point).
+    "fr".to_string()
 }
 
 fn default_overlay_position() -> OverlayPosition {
@@ -979,7 +982,7 @@ pub fn get_default_settings() -> AppSettings {
         clamshell_microphone: None,
         selected_output_device: None,
         translate_to_english: false,
-        selected_language: "auto".to_string(),
+        selected_language: default_selected_language(),
         overlay_position: default_overlay_position(),
         debug_mode: false,
         log_level: default_log_level(),

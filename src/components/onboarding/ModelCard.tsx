@@ -40,10 +40,15 @@ const getLanguageDisplayText = (
   });
 };
 
-// Legacy = a blob (Url-sourced) .bin model, kept runnable but no longer the
-// advertised download (catalog GGUFs supersede it).
+// Legacy = a blob (Url-sourced) .bin model that the catalog no longer
+// advertises: kept runnable, hidden from the download list. 404's own models
+// are Url-sourced too (their weights live on our GitHub release), but they are
+// catalog entries and the advertised downloads — hence the `is_recommended`
+// escape hatch.
 export const isLegacySource = (model: ModelInfo): boolean =>
-  typeof model.source === "object" && "Url" in model.source;
+  typeof model.source === "object" &&
+  "Url" in model.source &&
+  !model.is_recommended;
 
 // Extract a GGUF quantization label from a filename, if present (e.g. "Q8_0").
 const getQuantLabel = (filename: string): string | null => {

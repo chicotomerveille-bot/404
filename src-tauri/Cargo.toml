@@ -1,11 +1,11 @@
 [package]
-name = "handy"
+name = "four04"
 version = "0.9.8"
-description = "Handy"
+description = "404 - dictee vocale locale"
 authors = ["cjpais"]
 edition = "2021"
 license = "MIT"
-default-run = "handy"
+default-run = "four04"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.

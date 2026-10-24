@@ -22,10 +22,10 @@ usage : dicter du français, vite et juste, sur un PC sans carte graphique.
 
 ## Les modèles
 
-| Modèle | Taille | Pour quoi |
-| --- | --- | --- |
-| **404 Rapide** (base) | 141 Mo | Notes courtes, réponse quasi instantanée |
-| **404 Équilibré** (small) | 465 Mo | Le compromis par défaut : rapide et précis |
+| Modèle                         | Taille  | Pour quoi                                             |
+| ------------------------------ | ------- | ----------------------------------------------------- |
+| **404 Rapide** (base)          | 141 Mo  | Notes courtes, réponse quasi instantanée              |
+| **404 Équilibré** (small)      | 465 Mo  | Le compromis par défaut : rapide et précis            |
 | **404 Ultra** (large-v3-turbo) | 1,55 Go | Précision maximale, termes techniques et noms propres |
 
 Les trois tournent sur processeur, sans GPU. Le modèle se choisit dans les
@@ -54,7 +54,7 @@ pour insérer le texte.
 
 Le projet se compile avec Tauri 2 (Rust + React). La compilation Windows est
 assurée par GitHub Actions : chaque push sur `main` produit un installeur
-téléchargeable dans l'onglet *Actions*.
+téléchargeable dans l'onglet _Actions_.
 
 ```bash
 bun install

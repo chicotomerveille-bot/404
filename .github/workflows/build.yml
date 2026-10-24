@@ -786,13 +786,15 @@ jobs:
           # A bundle may legitimately ship without an MSI (404 is NSIS-only —
           # a numeric product name can't pass WiX's ICE39 summary validation).
           $msiPackages = Get-ChildItem (Join-Path $bundleBase "msi") -Filter "*.msi" -ErrorAction SilentlyContinue
+          # NOTE: avoid ${{ }}-injected conditionals inside PowerShell — a
+          # bareword `true` resolves as a *command* in pwsh (CommandNotFound
+          # -> $null -> falsy), which silently inversioned this branch once.
           if (-not $msiPackages) {
-            if (${{ contains(inputs.build-args, 'nsis') && !contains(inputs.build-args, 'msi') }}) {
-              Write-Host "Bundle is NSIS-only; skipping the MSI audit"
-            } else {
-              throw "No MSI packages found under $bundleBase for runtime DLL audit"
+            if ("${{ inputs.build-args }}" -match "msi") {
+              throw "No MSI packages found under $bundleBase despite build-args asking for one"
             }
-          }
+            Write-Host "No MSI produced (404 ships NSIS-only); skipping the MSI audit"
+          } else {
 
           foreach ($pkg in $msiPackages) {
             Write-Host "Auditing MSI package: $($pkg.FullName)"
@@ -808,6 +810,7 @@ jobs:
             }
             Assert-PackageContents -Root $installDir -Label "Installed MSI"
             Remove-Item -Recurse -Force $installDir
+          }
           }
 
       - name: Upload artifacts (Windows)

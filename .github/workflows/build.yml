@@ -479,6 +479,45 @@ jobs:
           assetNamePattern: ${{ steps.patch-release-name.outputs.platform }}
           args: ${{ inputs.build-args }}
 
+      # tauri-action captures light.exe/candle.exe output and only reports
+      # "failed to run <tool>", so reproduce the exact light invocation on the
+      # generated .wixobj to surface the real WiX errors when the MSI bundling
+      # fails, and keep the intermediates for inspection.
+      - name: Debug WiX light failure
+        if: failure()
+        shell: pwsh
+        run: |
+          $wixDir = Join-Path (Get-Location) "src-tauri/target/release/wix/x64"
+          if (-not (Test-Path $wixDir)) { Write-Host "No WixTools output dir at $wixDir"; exit 0 }
+          Get-ChildItem $wixDir | Select-Object Name, Length | Format-Table | Out-String | Write-Host
+          Copy-Item $wixDir\main.wxs $wixDir\main-debug.wxs
+          Push-Location $wixDir
+          $light = "$env:LOCALAPPDATA\tauri\WixTools314\light.exe"
+          if (Test-Path $light) {
+            & $light `
+              -ext WixUIExtension.dll `
+              -ext WixUtilExtension.dll `
+              -cultures:en-us `
+              -loc locale.wxl `
+              -o debug.msi `
+              *.wixobj
+            Write-Host "light exit code: $LASTEXITCODE"
+          } else {
+            Write-Host "light.exe not found at $light"
+          }
+          Pop-Location
+
+      - name: Upload WiX intermediates on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wix-intermediates
+          path: |
+            src-tauri/target/release/wix/x64/main-debug.wxs
+            src-tauri/target/release/wix/x64/locale.wxl
+            src-tauri/target/release/wix/x64/*.wixobj
+          if-no-files-found: ignore
+
       # tauri-action uploads release assets before returning. All AppImage
       # filtering therefore happens inside linuxdeploy above; this verifies the
       # exact artifact Tauri signed and uploaded.

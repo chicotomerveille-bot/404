@@ -555,14 +555,19 @@ mod tests {
     }
 
     #[test]
-    fn generated_descriptions_read_naturally() {
-        let gigaam = transcription_models()
-            .find(|m| m.id == "gigaam-v3-ctc")
-            .unwrap();
-        assert!(generated_description(gigaam).starts_with("Russian speech-to-text"));
-        let whisper = transcription_models()
-            .find(|m| m.id == "whisper-tiny")
-            .unwrap();
-        assert!(generated_description(whisper).contains("-language speech-to-text with"));
+    fn catalog_descriptions_read_naturally() {
+        // The Models page renders the catalog's editorial copy; models
+        // without copy fall through to the generated factual one-liner.
+        // Every surfaced description must be single-line, non-empty prose the
+        // UI can show as-is.
+        for m in transcription_models().filter(|m| m.is_offered()) {
+            let rendered = if m.description.is_empty() {
+                generated_description(m)
+            } else {
+                m.description.clone()
+            };
+            assert!(!rendered.trim().is_empty(), "{}: empty description", m.id);
+            assert!(!rendered.contains('\n'), "{}: multi-line description", m.id);
+        }
     }
 }

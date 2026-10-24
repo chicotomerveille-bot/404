@@ -638,10 +638,12 @@ impl<'a> Drop for DownloadCleanup<'a> {
     }
 }
 
-/// A retired ONNX model: nothing can load it anymore, but it may still be on
-/// disk. The update screen offers its GGUF replacement and then deletes it.
-/// This table is the single source of truth for retired models; the frontend
-/// only renders what `get_retired_models` reports.
+/// A retired ONNX model. The struct (and the migration plumbing wired to it
+/// in the commands and frontend) is kept, but 404 ships an empty table: every
+/// historical replacement download pointed at the old project's Hugging Face
+/// organisation, which 404 neither controls nor mirrors, and 404 has no
+/// ONNX-era user base. Empty means `get_retired_models` reports nothing, so
+/// the migration UI has no rows and any leftovers on disk stay inert.
 struct RetiredOnnxModel {
     id: &'static str,
     name: &'static str,
@@ -653,85 +655,7 @@ struct RetiredOnnxModel {
     replacement_repo: &'static str,
 }
 
-const RETIRED_ONNX_MODELS: &[RetiredOnnxModel] = &[
-    RetiredOnnxModel {
-        id: "parakeet-tdt-0.6b-v2",
-        name: "Parakeet V2",
-        disk_names: &["parakeet-tdt-0.6b-v2-int8"],
-        size_mb: 451,
-        replacement_repo: "handy-computer/parakeet-tdt-0.6b-v2-gguf",
-    },
-    RetiredOnnxModel {
-        id: "parakeet-tdt-0.6b-v3",
-        name: "Parakeet V3",
-        disk_names: &["parakeet-tdt-0.6b-v3-int8"],
-        size_mb: 456,
-        replacement_repo: "handy-computer/parakeet-tdt-0.6b-v3-gguf",
-    },
-    RetiredOnnxModel {
-        id: "moonshine-base",
-        name: "Moonshine Base",
-        disk_names: &["moonshine-base"],
-        size_mb: 55,
-        replacement_repo: "handy-computer/moonshine-base-gguf",
-    },
-    RetiredOnnxModel {
-        id: "moonshine-tiny-streaming-en",
-        name: "Moonshine V2 Tiny",
-        disk_names: &["moonshine-tiny-streaming-en"],
-        size_mb: 31,
-        replacement_repo: "handy-computer/moonshine-streaming-tiny-gguf",
-    },
-    RetiredOnnxModel {
-        id: "moonshine-small-streaming-en",
-        name: "Moonshine V2 Small",
-        disk_names: &["moonshine-small-streaming-en"],
-        size_mb: 99,
-        replacement_repo: "handy-computer/moonshine-streaming-small-gguf",
-    },
-    RetiredOnnxModel {
-        id: "moonshine-medium-streaming-en",
-        name: "Moonshine V2 Medium",
-        disk_names: &["moonshine-medium-streaming-en"],
-        size_mb: 192,
-        replacement_repo: "handy-computer/moonshine-streaming-medium-gguf",
-    },
-    RetiredOnnxModel {
-        id: "sense-voice-int8",
-        name: "SenseVoice",
-        disk_names: &["sense-voice-int8"],
-        size_mb: 152,
-        replacement_repo: "handy-computer/SenseVoiceSmall-gguf",
-    },
-    RetiredOnnxModel {
-        id: "gigaam-v3-e2e-ctc",
-        name: "GigaAM v3",
-        disk_names: &["giga-am-v3-int8", "giga-am-v3.int8.onnx"],
-        size_mb: 151,
-        replacement_repo: "handy-computer/gigaam-v3-e2e-ctc-gguf",
-    },
-    RetiredOnnxModel {
-        id: "canary-180m-flash",
-        name: "Canary 180M Flash",
-        disk_names: &["canary-180m-flash"],
-        size_mb: 146,
-        replacement_repo: "handy-computer/canary-180m-flash-gguf",
-    },
-    RetiredOnnxModel {
-        id: "canary-1b-v2",
-        name: "Canary 1B v2",
-        disk_names: &["canary-1b-v2"],
-        size_mb: 691,
-        replacement_repo: "handy-computer/canary-1b-v2-gguf",
-    },
-    RetiredOnnxModel {
-        id: "cohere-int8",
-        name: "Cohere",
-        disk_names: &["cohere-int8"],
-        size_mb: 1708,
-        replacement_repo: "handy-computer/cohere-transcribe-03-2026-gguf",
-    },
-];
+const RETIRED_ONNX_MODELS: &[RetiredOnnxModel] = &[];
 
 /// A retired ONNX model found on disk.
 #[derive(Serialize, Clone, Debug, Type)]
@@ -2250,45 +2174,14 @@ mod tests {
         path
     }
 
-    fn catalog_model(id_prefix: &str) -> &'static ModelDescriptor {
-        crate::catalog::CATALOG
-            .iter()
-            .find(|d| d.id.starts_with(id_prefix))
-            .unwrap_or_else(|| panic!("catalog has {id_prefix}"))
-    }
-
-    fn hf_source(desc: &ModelDescriptor) -> (&str, &str) {
-        match &desc.source {
-            ModelSource::HuggingFace { repo_id, revision } => (repo_id, revision),
-            _ => panic!("catalog descriptors are HF-sourced"),
-        }
-    }
-
     #[test]
-    fn test_every_retired_model_has_a_downloadable_replacement() {
-        // A missing replacement would silently hide a row in the migration UI.
-        let mut registry = HashMap::new();
-        ModelManager::seed_catalog_models(&mut registry);
-        for retired in RETIRED_ONNX_MODELS {
-            let replacement = registry
-                .values()
-                .find(|info| {
-                    matches!(&info.source, ModelSource::HuggingFace { repo_id, .. }
-                        if repo_id == retired.replacement_repo)
-                })
-                .unwrap_or_else(|| {
-                    panic!(
-                        "{}: replacement {} is not offered",
-                        retired.id, retired.replacement_repo
-                    )
-                });
-            assert!(
-                !crate::catalog::mirror_fallbacks(&replacement.id).is_empty(),
-                "{}: replacement {} has no mirror fallback",
-                retired.id,
-                replacement.id
-            );
-        }
+    fn test_no_retired_onnx_model_is_offered_for_migration() {
+        // 404 inherits no ONNX-era import base, and every historical
+        // replacement download pointed at the old project's Hugging Face
+        // organisation, which 404 does not host. The table must stay empty so
+        // `get_retired_models` never reports a row and the migration UI can
+        // never offer a file 404 does not own.
+        assert!(RETIRED_ONNX_MODELS.is_empty());
     }
 
     #[test]
@@ -2316,45 +2209,15 @@ mod tests {
     }
 
     #[test]
-    fn test_old_q5_is_discovered_and_survives_deleting_all_q8_copies() {
-        let desc = catalog_model("handy-computer/whisper-large-v3-gguf/");
-        let (repo, revision) = hf_source(desc);
-        let q5 = desc.files.iter().find(|f| f.quant == "Q5_K_M").unwrap();
-        let q8 = desc.default_file().unwrap();
-        assert_eq!(q8.quant, "Q8_0");
-
-        let cache = TempDir::new().unwrap();
-        let legacy = TempDir::new().unwrap();
-        let old = add_unreferenced_snapshot_file(cache.path(), repo, "unknown", &q5.filename);
-        let caches = vec![
-            Cache::new(cache.path().to_path_buf()),
-            Cache::new(legacy.path().to_path_buf()),
-        ];
-        for cache in &caches {
-            for rev in [revision, "main", "unknown"] {
-                add_unreferenced_snapshot_file(cache.path(), repo, rev, &q8.filename);
-            }
+    fn test_catalog_models_offer_a_single_quant() {
+        // Each 404 model is one file on our own release. No multi-quant
+        // offering exists anymore, so the alternate-quant discovery paths can
+        // only ever fire on foreign files in a shared HF cache. If a
+        // multi-quant model returns, re-derive the discovery tests this
+        // replaces (they covered Q5_K_M alongside Q8_0).
+        for d in CATALOG.iter() {
+            assert_eq!(d.files.len(), 1, "{}: multi-quant offering is back", d.id);
         }
-        let readme = old.parent().unwrap().join("README.md");
-        fs::write(&readme, "unrelated file").unwrap();
-
-        let mut models = HashMap::new();
-        ModelManager::seed_catalog_models(&mut models);
-        ModelManager::discover_hf_cache_models_in(cache.path(), &mut models);
-        let info = &models[&format!("{repo}/{}", q5.filename)];
-        assert!(info.is_downloaded);
-        assert_eq!(info.name, format!("{} (Q5_K_M)", desc.name));
-        assert!(models.contains_key(&desc.id));
-
-        assert!(
-            ModelManager::delete_hf_cache_file_in(&caches, repo, revision, &q8.filename).unwrap()
-        );
-        assert!(hf_cached_paths_in(&caches, repo, revision, &q8.filename).is_empty());
-        assert_eq!(
-            hf_cached_path_in(&caches, repo, revision, &q5.filename),
-            Some(old)
-        );
-        assert!(readme.exists());
     }
 
     /// An HF-style cached file: a snapshot symlink to a blob named after its
@@ -2401,9 +2264,12 @@ mod tests {
         // fail the delete, not report success while the model stays on disk.
         use std::os::unix::fs::PermissionsExt;
 
-        let desc = catalog_model("handy-computer/canary-180m-flash-gguf/");
-        let (repo_id, revision) = hf_source(desc);
-        let filename = &desc.default_file().unwrap().filename;
+        // The delete path takes plain repo/revision/filename strings: the
+        // permissions behaviour does not depend on the catalog, so literals
+        // stand in for a cached model's identity.
+        let repo_id = "someone/model";
+        let revision = "main";
+        let filename = "model.gguf";
         let caches_in = |cache: &TempDir| vec![Cache::new(cache.path().to_path_buf())];
         let lock =
             |dir: &Path, mode| fs::set_permissions(dir, fs::Permissions::from_mode(mode)).unwrap();
@@ -2695,53 +2561,6 @@ mod tests {
         assert_eq!(same.is_recommended, default_info.is_recommended);
     }
 
-    #[test]
-    fn test_discover_catalog_alternate_quant_in_models_dir() {
-        // A real catalog model with more than one quant.
-        let desc = crate::catalog::CATALOG
-            .iter()
-            .find(|d| d.files.len() > 1)
-            .expect("catalog offers multi-quant models");
-        let default_filename = default_quant_file(&desc.files, desc.default_quant.as_deref())
-            .unwrap()
-            .filename
-            .clone();
-        let alt = desc
-            .files
-            .iter()
-            .find(|f| f.filename != default_filename)
-            .unwrap();
-
-        let temp_dir = TempDir::new().unwrap();
-        // Content is never probed for catalog-matched files, so empty files do.
-        fs::write(temp_dir.path().join(&alt.filename), b"").unwrap();
-        fs::write(temp_dir.path().join(&default_filename), b"").unwrap();
-
-        let mut models = HashMap::new();
-        ModelManager::seed_catalog_models(&mut models);
-        let seeded = models.len();
-        ModelManager::discover_custom_transcribe_models(temp_dir.path(), &mut models).unwrap();
-
-        // The alternate quant surfaces as a catalog-grade HF entry…
-        let ModelSource::HuggingFace { repo_id, .. } = &desc.source else {
-            panic!("catalog descriptors are HF-sourced");
-        };
-        let alt_id = format!("{}/{}", repo_id, alt.filename);
-        let info = models.get(&alt_id).expect("alternate quant discovered");
-        assert_eq!(info.name, format!("{} ({})", desc.name, alt.quant));
-        assert_eq!(info.description, desc.description);
-        assert!(info.is_downloaded);
-        assert!(!info.is_custom);
-        assert!(matches!(info.source, ModelSource::HuggingFace { .. }));
-        assert!(ModelManager::disappears_when_missing(info));
-
-        // …while the default-quant file dedups onto its seeded entry: exactly
-        // one new id, and no filename-stem custom entries for either file.
-        assert_eq!(models.len(), seeded + 1);
-        assert!(!models.contains_key(alt.filename.trim_end_matches(".gguf")));
-        assert!(!models.contains_key(default_filename.trim_end_matches(".gguf")));
-    }
-
     fn push_gguf_str(out: &mut Vec<u8>, val: &str) {
         out.extend_from_slice(&(val.len() as u64).to_le_bytes());
         out.extend_from_slice(val.as_bytes());
@@ -2770,20 +2589,17 @@ mod tests {
 
     #[test]
     fn test_discover_hf_cache_keeps_the_cache_folder_casing() {
-        // HF repo ids are case-insensitive, so another tool can cache a catalog
-        // repo under other casing. On a case-sensitive filesystem only that
-        // casing finds the file again, so it must not take the catalog's.
-        let filename = "SenseVoiceSmall-Q8_0.gguf";
-        let folder_repo = "handy-computer/sensevoicesmall-gguf";
-        assert!(crate::catalog::file_in_catalog(
-            filename,
-            Some("handy-computer/SenseVoiceSmall-gguf")
-        )
-        .is_some());
+        // The repo id is taken verbatim from hf-hub's `models--org--name`
+        // folder: whatever casing the cache holds is the only spelling a
+        // case-sensitive filesystem can find the file back under, so it must
+        // not be rewritten. (404's own models are release-hosted, so this
+        // only concerns foreign repos surfaced from a shared cache.)
+        let filename = "Whisper-Q8_0.gguf";
+        let folder_repo = "someone/WhisperTest";
 
         let cache = TempDir::new().unwrap();
         let path = add_cached_model(cache.path(), folder_repo, "main", filename);
-        write_synthetic_gguf(&path, "sensevoice", &["en", "zh"]);
+        write_synthetic_gguf(&path, "whisper", &["en", "de"]);
 
         let mut models = HashMap::new();
         ModelManager::discover_hf_cache_models_in(cache.path(), &mut models);

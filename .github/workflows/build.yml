@@ -786,9 +786,10 @@ jobs:
           # A bundle may legitimately ship without an MSI (404 is NSIS-only —
           # a numeric product name can't pass WiX's ICE39 summary validation).
           $msiPackages = Get-ChildItem (Join-Path $bundleBase "msi") -Filter "*.msi" -ErrorAction SilentlyContinue
-          # NOTE: avoid ${{ }}-injected conditionals inside PowerShell — a
-          # bareword `true` resolves as a *command* in pwsh (CommandNotFound
-          # -> $null -> falsy), which silently inversioned this branch once.
+          # NOTE: avoid GitHub-expression-injected conditionals inside
+          # PowerShell — a bareword `true` resolves as a *command* in pwsh
+          # (CommandNotFound -> $null -> falsy), which silently inversioned
+          # this branch once. Pass build-args through a plain string instead.
           if (-not $msiPackages) {
             if ("${{ inputs.build-args }}" -match "msi") {
               throw "No MSI packages found under $bundleBase despite build-args asking for one"

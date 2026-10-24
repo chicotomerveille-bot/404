@@ -25,7 +25,12 @@ jobs:
       matrix:
         include:
           - platform: "windows-latest"
-            args: ""
+            # NSIS-only: the MSI is impossible for a purely numeric product
+            # name — WiX types the summary Subject as an integer for "404" and
+            # its ICE39 validation then fails the link (verified against WiX
+            # 3.14.1: Name="404" -> error LGHT0204 ICE39 PID_SUBJECT). The
+            # setup.exe is 404's shipped installer.
+            args: "--bundles nsis"
             target: "x86_64-pc-windows-msvc"
 
     uses: ./.github/workflows/build.yml

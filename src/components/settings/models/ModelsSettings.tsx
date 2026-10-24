@@ -27,9 +27,13 @@ const modelSupportsLanguage = (model: ModelInfo, langCode: string): boolean => {
 
 // Legacy models are the blob (Url-sourced) .bin downloads, superseded by
 // the catalog GGUFs. They stay runnable when already on disk, but we no longer
-// advertise the download.
+// advertise the download. 404's own models are Url-sourced too (their weights
+// live on our GitHub release) but ARE advertised — same criterion as the
+// onboarding's `isLegacySource`: legacy = Url and NOT recommended.
 const isLegacyModel = (model: ModelInfo): boolean =>
-  typeof model.source === "object" && "Url" in model.source;
+  typeof model.source === "object" &&
+  "Url" in model.source &&
+  !model.is_recommended;
 
 export const ModelsSettings: React.FC = () => {
   const { t } = useTranslation();

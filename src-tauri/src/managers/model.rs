@@ -2215,7 +2215,7 @@ mod tests {
         // only ever fire on foreign files in a shared HF cache. If a
         // multi-quant model returns, re-derive the discovery tests this
         // replaces (they covered Q5_K_M alongside Q8_0).
-        for d in CATALOG.iter() {
+        for d in crate::catalog::CATALOG.iter() {
             assert_eq!(d.files.len(), 1, "{}: multi-quant offering is back", d.id);
         }
     }

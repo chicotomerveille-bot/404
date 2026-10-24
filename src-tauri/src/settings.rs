@@ -568,7 +568,10 @@ fn default_autostart_enabled() -> bool {
 }
 
 fn default_update_checks_enabled() -> bool {
-    true
+    // 404 distributes its installers directly from its GitHub releases; the
+    // Tauri updater endpoint would need signed bundles we don't publish, so
+    // keep checks opt-in rather than pinging an endpoint that can't answer.
+    false
 }
 
 fn default_show_whats_new_on_update() -> bool {

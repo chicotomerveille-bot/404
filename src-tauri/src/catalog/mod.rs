@@ -35,32 +35,22 @@ use crate::managers::model_capabilities::{CapabilityProbe, Compatibility};
 /// breaking change; additive fields are ignored.
 const SCHEMA: u32 = 2;
 
-/// Base URLs tried in order when the Hugging Face download fails. The full
-/// file URL is `{mirror}/{repo_id}/{revision}/{filename}` — the same three
-/// values that form the HF resolve URL, so a mirror is a plain static host.
-/// `scripts/mirror_models.py` populates it from this catalog.
-const MIRRORS: &[&str] = &["https://blob.handy.computer"];
+/// 404 ships no third-party mirror: every catalog ASR model downloads directly
+/// from our own GitHub release URL (the catalog's sha256 stays the trust
+/// anchor), and HF-sourced entries no longer exist. `mirror_fallbacks` is kept
+/// as an always-empty shim so the mirror branch in the downloader stays a no-op
+/// even if a future entry ever points back at Hugging Face.
 
 /// 404's list order and onboarding set, keyed by catalog id. Our own three
-/// models lead the list and are the only ones badged "Recommended", so
-/// onboarding offers exactly the French dictation ladder; the upstream models
-/// stay available below them for anyone who wants something else.
+/// models lead the list, are the only entries in the catalog, and are the only
+/// ones badged "Recommended"; onboarding and the Models page offer exactly
+/// the French dictation ladder.
 /// `(id, rank, recommended)`: rank is the editorial sort position (lower =
 /// higher); recommended is the small badged onboarding subset.
 const HANDY_RANKING: &[(&str, u32, bool)] = &[
     ("four04-small", 1, true),
     ("four04-turbo", 2, true),
     ("four04-base", 3, true),
-    ("parakeet-unified-en-0.6b", 4, false),
-    ("nemotron-3.5-asr-streaming-0.6b", 5, false),
-    ("canary-180m-flash", 6, false),
-    ("cohere-transcribe-03-2026", 7, false),
-    ("whisper-medium", 8, false),
-    ("Voxtral-Mini-4B-Realtime-2602", 9, false),
-    ("parakeet-tdt-0.6b-v3", 10, false),
-    ("parakeet-tdt-0.6b-v2", 11, false),
-    ("Qwen3-ASR-0.6B", 12, false),
-    ("Fun-ASR-MLT-Nano-2512", 13, false),
 ];
 
 #[derive(Deserialize)]
@@ -377,37 +367,12 @@ pub struct MirrorFile {
     pub size_bytes: u64,
 }
 
-/// Ordered mirror URLs for an offered catalog model's file — any listed quant,
-/// not just the default — or empty when the model isn't offered from the
-/// catalog. `model_id` is the registry id (`"{repo_id}/{filename}"`). (The
-/// mirror only hosts default quants; a miss there just 404s and the caller
-/// reports it, so listing every quant here costs nothing.)
-pub fn mirror_fallbacks(model_id: &str) -> Vec<MirrorFile> {
-    let Some((m, file)) = transcription_models()
-        .filter(|m| m.is_offered())
-        .find_map(|m| {
-            m.files
-                .values()
-                .find(|f| format!("{}/{}", m.repository, f.filename) == model_id)
-                .map(|f| (m, f))
-        })
-    else {
-        return Vec::new();
-    };
-    MIRRORS
-        .iter()
-        .map(|base| MirrorFile {
-            url: format!(
-                "{}/{}/{}/{}",
-                base.trim_end_matches('/'),
-                m.repository,
-                m.revision,
-                file.filename
-            ),
-            sha256: file.sha256.clone(),
-            size_bytes: file.size,
-        })
-        .collect()
+/// Always empty: 404 hosts every catalog ASR model on its own GitHub release
+/// (`ModelSource::Url`), so there is no third-party mirror to fall back to.
+/// Kept as a shim so the downloader's mirror branch stays a harmless no-op and
+/// a future HF-catalog entry can't silently resurrect a stale host.
+pub fn mirror_fallbacks(_model_id: &str) -> Vec<MirrorFile> {
+    Vec::new()
 }
 
 /// The catalog descriptor + specific `files[]` entry owning `filename`,
@@ -527,17 +492,15 @@ mod tests {
     }
 
     #[test]
-    fn every_offered_model_has_mirror_fallbacks_with_hashes() {
-        // The mirror fallback is the safety net for HF outages and blocked
-        // networks; an offered entry without one silently loses that net.
+    fn no_catalog_model_uses_mirror_fallbacks() {
+        // 404 hosts every model on its own release; the mirror shim must stay
+        // empty so the downloader's mirror branch remains an unreachable no-op.
         for d in CATALOG.iter() {
-            let mirrors = mirror_fallbacks(&d.id);
-            assert!(!mirrors.is_empty(), "{}: no mirror fallbacks", d.id);
-            for m in &mirrors {
-                assert_eq!(m.sha256.len(), 64, "{}: mirror entry lacks a sha256", d.id);
-                assert!(m.size_bytes > 0, "{}: mirror entry lacks a size", d.id);
-                assert!(m.url.starts_with("https://"), "{}: bad url {}", d.id, m.url);
-            }
+            assert!(
+                mirror_fallbacks(&d.id).is_empty(),
+                "{}: unexpected mirror fallback",
+                d.id
+            );
         }
     }
 

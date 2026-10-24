@@ -1085,7 +1085,7 @@ export type ModelLoadStatus = { is_loaded: boolean; current_model: string | null
  */
 export type ModelSource = 
 /**
- * Direct HTTP download from a URL (current blob.handy.computer hosting).
+ * Direct HTTP download from a URL (404's own GitHub-release hosting).
  */
 { Url: { url: string; 
 /**

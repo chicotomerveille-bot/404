@@ -24,7 +24,7 @@ use download::{HttpDownloadOutcome, DOWNLOAD_STALL_TIMEOUT};
 /// for downloading and on-disk resolution.
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub enum ModelSource {
-    /// Direct HTTP download from a URL (current blob.handy.computer hosting).
+    /// Direct HTTP download from a URL (404's own GitHub-release hosting).
     Url {
         url: String,
         /// Expected SHA-256 for integrity verification; `None` skips it.

@@ -34,7 +34,7 @@ réglages et se télécharge au premier lancement.
 ## Installation
 
 1. Téléchargez l'installeur Windows depuis les
-   [releases](https://github.com/chicotomerveille-bot/Handy/releases).
+   [releases](https://github.com/chicotomerveille-bot/404/releases).
 2. Lancez-le : installation par utilisateur, aucun droit administrateur requis.
 3. Au premier démarrage, choisissez un modèle — « 404 Équilibré » est un bon
    point de départ.

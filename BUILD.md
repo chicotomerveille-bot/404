@@ -141,8 +141,8 @@ After installing the final bundle at `/Applications/Handy.app`, quit Handy, clea
 stale Accessibility record, then reopen it:
 
 ```bash
-osascript -e 'tell application id "com.pais.handy" to quit' || true
-tccutil reset Accessibility com.pais.handy
+osascript -e 'tell application id "com.four04.dictation" to quit' || true
+tccutil reset Accessibility com.four04.dictation
 open /Applications/Handy.app
 ```
 

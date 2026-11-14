@@ -41,8 +41,8 @@ const Onboarding: React.FC<OnboardingProps> = ({
   // Curate the download list: retired blob (.bin) models are never shown here
   // (they still appear in the compatible section if already on disk). The
   // catalog arrives rank-sorted, so the first two recommended models are the
-  // featured picks — 404 Équilibré then 404 Ultra — and 404 Rapide plus every
-  // unranked model sits behind "Show all".
+  // featured picks — 404 Équilibré then 404 Ultra (Parakeet v3) — and 404
+  // Rapide plus every unranked model sits behind "Show all".
   const { downloadable, topPicks, otherRecommended, rest } = useMemo(() => {
     const downloadable = models.filter(
       (m: ModelInfo) => !m.is_downloaded && !isLegacySource(m),

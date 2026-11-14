@@ -11,25 +11,34 @@ usage : dicter du français, vite et juste, sur un PC sans carte graphique.
 
 ## Ce qui change par rapport à Handy
 
-- **Trois modèles, un seul choix à faire.** Les poids Whisper (GGML) sont hébergés
-  sur ce dépôt et téléchargés depuis nos releases — plus de dépendance à un
-  hébergement tiers.
+- **Trois modèles, un seul choix à faire.** Les poids Whisper (GGML) de
+  « 404 Rapide » et « 404 Équilibré » sont hébergés sur ce dépôt et téléchargés
+  depuis nos releases. « 404 Ultra » utilise Parakeet TDT 0.6B v3 (GGUF Q8_0),
+  récupéré depuis le dépôt Hugging Face officiel à une révision figée — aucun
+  gros fichier n'est stocké dans le dépôt ni dans l'installeur.
 - **Français par défaut.** La langue de reconnaissance est fixée au français au
   lieu de la détection automatique, peu fiable sur les phrases courtes.
+  Parakeet v3 fait exception : il détecte lui-même la langue et ignore cette
+  consigne (le français fait partie de ses 25 langues).
 - **Interface noir et blanc.** Plus aucune couleur d'accent : le contraste porte
   l'interface, seules les erreurs et les avertissements gardent une teinte.
 - **Windows x64 uniquement.** Le reste de la matrice de build upstream est retiré.
 
 ## Les modèles
 
-| Modèle                         | Taille  | Pour quoi                                             |
-| ------------------------------ | ------- | ----------------------------------------------------- |
-| **404 Rapide** (base)          | 141 Mo  | Notes courtes, réponse quasi instantanée              |
-| **404 Équilibré** (small)      | 465 Mo  | Le compromis par défaut : rapide et précis            |
-| **404 Ultra** (large-v3-turbo) | 1,55 Go | Précision maximale, termes techniques et noms propres |
+| Modèle                               | Taille | Pour quoi                                           |
+| ------------------------------------ | ------ | --------------------------------------------------- |
+| **404 Rapide** (Whisper base)        | 141 Mo | Notes courtes, réponse quasi instantanée            |
+| **404 Équilibré** (Whisper small)    | 465 Mo | Le compromis par défaut : rapide et précis          |
+| **404 Ultra** (Parakeet TDT 0.6B v3) | 705 Mo | Précision maximale, 25 langues, très faible latence |
 
 Les trois tournent sur processeur, sans GPU. Le modèle se choisit dans les
 réglages et se télécharge au premier lancement.
+
+Face à l'ancien `large-v3-turbo` (1,55 Go), Parakeet v3 occupe moins de la
+moitié de l'espace et transcrit environ **9× plus vite** sur CPU (facteur temps
+réel 13,7 contre 1,4 dans les benchmarks du catalogue), avec un taux d'erreur
+d'environ 5,3 % en français sur FLEURS.
 
 ## Installation
 
@@ -44,11 +53,30 @@ pour insérer le texte.
 
 ## Vie privée
 
-- L'audio est traité sur votre machine par whisper.cpp, via
-  [transcribe-cpp](https://github.com/handy-computer/transcribe-cpp).
+- L'audio est traité sur votre machine par
+  [transcribe-cpp](https://github.com/handy-computer/transcribe-cpp) :
+  whisper.cpp pour « Rapide » et « Équilibré », le chargeur Parakeet pour
+  « Ultra ».
 - Le silence est filtré en local par Silero VAD.
 - Les seules connexions sortantes servent à télécharger un modèle et à vérifier
   les mises à jour ; les deux peuvent être désactivées dans les réglages.
+
+## Provenance du modèle Ultra
+
+« 404 Ultra » n'est pas embarqué dans l'installeur. Au premier lancement,
+l'application télécharge le GGUF depuis
+[handy-computer/parakeet-tdt-0.6b-v3-gguf](https://huggingface.co/handy-computer/parakeet-tdt-0.6b-v3-gguf)
+à la révision figée `85ac09ea12fc4b1112fa76810059364bc6adc9de`, puis le vérifie
+avec le SHA-256 compilé dans `catalog.json` :
+
+- taille : 739 508 576 octets (705 Mio), téléchargés uniquement sur le poste de
+  l'utilisateur final, jamais dans ce dépôt Git
+- SHA-256 : `5859f77944efcd8eafa23a6350731960b2b55b2203df51f319665c807d802cc7`
+
+Pour héberger ce fichier sur la release `models-v1` (optionnel), il suffit
+d'ajouter un champ `url` au fichier `Q8_0` de l'entrée `four04-parakeet-v3` du
+catalogue. Cette opération manipule 705 Mio : à faire depuis un runner CI plutôt
+qu'en local.
 
 ## Construire
 
@@ -71,3 +99,8 @@ Les prérequis détaillés (Rust, Visual Studio Build Tools, CMake) sont dans
 des contributeurs de Handy, publié sous licence MIT (voir [LICENSE](LICENSE)).
 Les poids Whisper proviennent de [ggerganov/whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 (OpenAI Whisper, licence MIT).
+Les poids « 404 Ultra » proviennent de
+[NVIDIA Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3),
+convertis en GGUF par
+[handy-computer](https://huggingface.co/handy-computer/parakeet-tdt-0.6b-v3-gguf)
+(licence CC BY 4.0).

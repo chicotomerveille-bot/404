@@ -2,8 +2,11 @@
 //!
 //! `catalog.json` starts as a copy of the `@handy-computer/models` package's
 //! catalog (the version pinned in `package.json`) and adds 404's own entries:
-//! three Whisper models hosted on this repository's `models-v1` release, each
-//! carrying a direct `url` in its default file. Because they are ordinary
+//! two Whisper models hosted on this repository's `models-v1` release (a direct
+//! `url` in the default file) plus the Ultra tier, NVIDIA Parakeet TDT 0.6B v3,
+//! resolved from its pinned upstream Hugging Face revision. Keeping Ultra
+//! upstream avoids mirroring another 705 MiB release asset; the catalog's
+//! sha256 still verifies every downloaded byte. Because they are ordinary
 //! catalog entries they rank, badge and appear in onboarding like any other —
 //! the only difference is where the bytes come from. The file is no longer kept
 //! byte-identical to the package (`check:catalog` is therefore not run in CI).
@@ -35,21 +38,22 @@ use crate::managers::model_capabilities::{CapabilityProbe, Compatibility};
 /// breaking change; additive fields are ignored.
 const SCHEMA: u32 = 2;
 
-/// 404 ships no third-party mirror: every catalog ASR model downloads directly
-/// from our own GitHub release URL (the catalog's sha256 stays the trust
-/// anchor), and HF-sourced entries no longer exist. `mirror_fallbacks` is kept
-/// as an always-empty shim so the mirror branch in the downloader stays a no-op
-/// even if a future entry ever points back at Hugging Face.
+/// 404 ships no third-party mirror: the Rapide/Équilibré weights download from
+/// our own GitHub release URL, while Ultra resolves from its pinned upstream HF
+/// revision (the catalog's sha256 stays the trust anchor). Neither path uses a
+/// mirror, so `mirror_fallbacks` stays an always-empty shim and the downloader's
+/// mirror branch remains a no-op.
 
 /// 404's list order and onboarding set, keyed by catalog id. Our own three
-/// models lead the list, are the only entries in the catalog, and are the only
-/// ones badged "Recommended"; onboarding and the Models page offer exactly
-/// the French dictation ladder.
+/// models lead the list, are the only ASR entries in the catalog, and are the
+/// only ones badged "Recommended"; onboarding and the Models page offer exactly
+/// the French dictation ladder. The Ultra slot is Parakeet TDT 0.6B v3 — kept
+/// at rank 2 so existing "404 Ultra" habits and onboarding copy still hold.
 /// `(id, rank, recommended)`: rank is the editorial sort position (lower =
 /// higher); recommended is the small badged onboarding subset.
 const HANDY_RANKING: &[(&str, u32, bool)] = &[
     ("four04-small", 1, true),
-    ("four04-turbo", 2, true),
+    ("four04-parakeet-v3", 2, true),
     ("four04-base", 3, true),
 ];
 
@@ -367,10 +371,10 @@ pub struct MirrorFile {
     pub size_bytes: u64,
 }
 
-/// Always empty: 404 hosts every catalog ASR model on its own GitHub release
-/// (`ModelSource::Url`), so there is no third-party mirror to fall back to.
-/// Kept as a shim so the downloader's mirror branch stays a harmless no-op and
-/// a future HF-catalog entry can't silently resurrect a stale host.
+/// Always empty: 404's own weights are hosted on its GitHub release
+/// (`ModelSource::Url`) and Ultra is pinned to an upstream HF revision
+/// (`ModelSource::HuggingFace`), so there is no mirror to fall back to. Kept as
+/// a shim so the downloader's mirror branch stays a harmless no-op.
 pub fn mirror_fallbacks(_model_id: &str) -> Vec<MirrorFile> {
     Vec::new()
 }
@@ -492,9 +496,25 @@ mod tests {
     }
 
     #[test]
+    fn ultra_tier_is_parakeet_v3() {
+        // Guard the swap so a catalog sync can't bring the old Whisper back.
+        let ultra = transcription_models()
+            .find(|m| m.id.as_str() == "four04-parakeet-v3")
+            .expect("404 Ultra must be Parakeet TDT 0.6B v3");
+        assert_eq!(ultra.family, "parakeet");
+        assert_eq!(ultra.quant, "Q8_0");
+        assert_eq!(ultra.files.len(), 1);
+        assert!(ultra.languages.iter().any(|l| l.as_str() == "fr"));
+        let file = ultra.default_file().unwrap();
+        assert!(file.filename.starts_with("parakeet-tdt-0.6b-v3"));
+        assert!(file.url.is_none());
+        assert!(!transcription_models().any(|m| m.id.as_str() == "four04-turbo"));
+    }
+
+    #[test]
     fn no_catalog_model_uses_mirror_fallbacks() {
-        // 404 hosts every model on its own release; the mirror shim must stay
-        // empty so the downloader's mirror branch remains an unreachable no-op.
+        // Every model is served from 404's own release; the mirror shim must
+        // stay empty so the downloader's mirror branch remains unreachable.
         for d in CATALOG.iter() {
             assert!(
                 mirror_fallbacks(&d.id).is_empty(),

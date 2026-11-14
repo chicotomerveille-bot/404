@@ -379,119 +379,45 @@
       }
     },
     {
-      "id": "four04-turbo",
-      "name": "404 Ultra",
-      "description": "Précision maximale, y compris sur les termes techniques et les noms propres.",
-      "repository": "chicotomerveille-bot/404-models",
-      "revision": "models-v1",
+      "id": "four04-parakeet-v3",
+      "name": "404 Ultra (Parakeet v3)",
+      "description": "Parakeet TDT 0.6B v3 : précision maximale et dictée rapide, 25 langues dont le français.",
+      "repository": "handy-computer/parakeet-tdt-0.6b-v3-gguf",
+      "revision": "85ac09ea12fc4b1112fa76810059364bc6adc9de",
       "previousRevisions": [],
-      "license": "mit",
-      "family": "whisper",
-      "parameters": "809M",
+      "license": "cc-by-4.0",
+      "family": "parakeet",
+      "parameters": "627M",
       "languages": [
-        "af",
-        "am",
-        "ar",
-        "as",
-        "az",
-        "ba",
-        "be",
         "bg",
-        "bn",
-        "bo",
-        "br",
-        "bs",
-        "ca",
+        "hr",
         "cs",
-        "cy",
         "da",
+        "nl",
+        "en",
+        "et",
+        "fi",
+        "fr",
         "de",
         "el",
-        "en",
-        "es",
-        "et",
-        "eu",
-        "fa",
-        "fi",
-        "fo",
-        "fr",
-        "gl",
-        "gu",
-        "haw",
-        "ha",
-        "he",
-        "hi",
-        "hr",
-        "ht",
         "hu",
-        "hy",
-        "id",
-        "is",
         "it",
-        "ja",
-        "jw",
-        "ka",
-        "kk",
-        "km",
-        "kn",
-        "ko",
-        "la",
-        "lb",
-        "ln",
-        "lo",
-        "lt",
         "lv",
-        "mg",
-        "mi",
-        "mk",
-        "ml",
-        "mn",
-        "mr",
-        "ms",
+        "lt",
         "mt",
-        "my",
-        "ne",
-        "nl",
-        "nn",
-        "no",
-        "oc",
-        "pa",
         "pl",
-        "ps",
         "pt",
         "ro",
         "ru",
-        "sa",
-        "sd",
-        "si",
         "sk",
         "sl",
-        "sn",
-        "so",
-        "sq",
-        "sr",
-        "su",
+        "es",
         "sv",
-        "sw",
-        "ta",
-        "te",
-        "tg",
-        "th",
-        "tk",
-        "tl",
-        "tr",
-        "tt",
-        "uk",
-        "ur",
-        "uz",
-        "vi",
-        "yi",
-        "yo",
-        "zh"
+        "uk"
       ],
       "capabilities": {
         "streaming": false,
-        "translate": true,
+        "translate": false,
         "languageDetection": true,
         "timestamps": true
       },
@@ -501,10 +427,9 @@
       "minEngine": "0.2.4",
       "files": {
         "Q8_0": {
-          "filename": "ggml-large-v3-turbo.bin",
-          "size": 1624555275,
-          "sha256": "1fc70f774d38eb169993ac391eea357ef47c88757ef72ee5943879b7e8e2bc69",
-          "url": "https://github.com/chicotomerveille-bot/404/releases/download/models-v1/ggml-large-v3-turbo.bin"
+          "filename": "parakeet-tdt-0.6b-v3-Q8_0.gguf",
+          "size": 739508576,
+          "sha256": "5859f77944efcd8eafa23a6350731960b2b55b2203df51f319665c807d802cc7"
         }
       }
     },
@@ -5689,344 +5614,112 @@
         "cpu": 5.86
       }
     },
-    "four04-turbo": {
+    "four04-parakeet-v3": {
       "accuracy": {
-        "af": {
-          "error": 36.06,
-          "ciLower": 33.6
-        },
-        "am": {
-          "error": 146.29,
-          "ciLower": 142.41
-        },
-        "ar": {
-          "error": 15.48,
-          "ciLower": 14.1
-        },
-        "as": {
-          "error": 101.22,
-          "ciLower": 100.8
-        },
-        "az": {
-          "error": 23.15,
-          "ciLower": 22.1
-        },
-        "be": {
-          "error": 50.65,
-          "ciLower": 49.58
-        },
         "bg": {
-          "error": 13.58,
-          "ciLower": 12.78
-        },
-        "bn": {
-          "error": 67.53,
-          "ciLower": 66.01
-        },
-        "bs": {
-          "error": 14.77,
-          "ciLower": 14.06
-        },
-        "ca": {
-          "error": 5.42,
-          "ciLower": 5.01
+          "error": 12.81,
+          "ciLower": 12.01
         },
         "cs": {
-          "error": 11.81,
-          "ciLower": 11.06
-        },
-        "cy": {
-          "error": 36.42,
-          "ciLower": 35.37
+          "error": 12.31,
+          "ciLower": 11.42
         },
         "da": {
-          "error": 13.6,
-          "ciLower": 12.93
+          "error": 18.64,
+          "ciLower": 17.84
         },
         "de": {
-          "error": 4.54,
-          "ciLower": 4.14
+          "error": 5.24,
+          "ciLower": 4.83
         },
         "el": {
-          "error": 13.26,
-          "ciLower": 12.35
+          "error": 35.33,
+          "ciLower": 34.07
         },
         "en": {
-          "error": 4.38,
-          "ciLower": 3.95
+          "error": 4.83,
+          "ciLower": 4.39
         },
         "es": {
-          "error": 3.12,
-          "ciLower": 2.8
+          "error": 3.65,
+          "ciLower": 3.32
         },
         "et": {
-          "error": 18.44,
-          "ciLower": 17.5
-        },
-        "fa": {
-          "error": 30.56,
-          "ciLower": 29.52
+          "error": 17.96,
+          "ciLower": 17.06
         },
         "fi": {
-          "error": 8.29,
-          "ciLower": 7.65
-        },
-        "fil": {
-          "error": 12.08,
-          "ciLower": 11.43
+          "error": 13.3,
+          "ciLower": 12.48
         },
         "fr": {
-          "error": 5.51,
-          "ciLower": 5.01
-        },
-        "gl": {
-          "error": 12.76,
-          "ciLower": 12.22
-        },
-        "gu": {
-          "error": 78.95,
-          "ciLower": 77.6
-        },
-        "ha": {
-          "error": 97.24,
-          "ciLower": 95.3
-        },
-        "he": {
-          "error": 29.71,
-          "ciLower": 28.05
-        },
-        "hi": {
-          "error": 18.85,
-          "ciLower": 17.82
+          "error": 5.3,
+          "ciLower": 4.77
         },
         "hr": {
-          "error": 12.54,
-          "ciLower": 11.83
+          "error": 12.59,
+          "ciLower": 11.85
         },
         "hu": {
-          "error": 15.07,
-          "ciLower": 14.25
-        },
-        "hy": {
-          "error": 45.62,
-          "ciLower": 44.42
-        },
-        "id": {
-          "error": 7.2,
-          "ciLower": 6.56
-        },
-        "is": {
-          "error": 21.39,
-          "ciLower": 17.91
+          "error": 16.06,
+          "ciLower": 15.24
         },
         "it": {
-          "error": 2.77,
-          "ciLower": 2.45
-        },
-        "ja": {
-          "error": 4.82,
-          "ciLower": 4.4
-        },
-        "jv": {
-          "error": 53.8,
-          "ciLower": 52.56
-        },
-        "ka": {
-          "error": 109.21,
-          "ciLower": 107.78
-        },
-        "kk": {
-          "error": 21.27,
-          "ciLower": 20.15
-        },
-        "km": {
-          "error": 95.2,
-          "ciLower": 93.97
-        },
-        "kn": {
-          "error": 32.57,
-          "ciLower": 31.26
-        },
-        "ko": {
-          "error": 5.24,
-          "ciLower": 4.3
-        },
-        "lb": {
-          "error": 87.21,
-          "ciLower": 86.38
-        },
-        "ln": {
-          "error": 75.39,
-          "ciLower": 72.93
-        },
-        "lo": {
-          "error": 115.41,
-          "ciLower": 111.93
+          "error": 3.02,
+          "ciLower": 2.72
         },
         "lt": {
-          "error": 25.11,
-          "ciLower": 24.23
+          "error": 22.2,
+          "ciLower": 21.36
         },
         "lv": {
-          "error": 19.53,
-          "ciLower": 18.64
-        },
-        "mi": {
-          "error": 48.91,
-          "ciLower": 47.53
-        },
-        "mk": {
-          "error": 17.85,
-          "ciLower": 17.07
-        },
-        "ml": {
-          "error": 98.75,
-          "ciLower": 98.01
-        },
-        "mn": {
-          "error": 101.49,
-          "ciLower": 100.04
-        },
-        "mr": {
-          "error": 36.12,
-          "ciLower": 35.26
-        },
-        "ms": {
-          "error": 8.64,
-          "ciLower": 8
+          "error": 23.77,
+          "ciLower": 22.87
         },
         "mt": {
-          "error": 70.92,
-          "ciLower": 69.87
-        },
-        "my": {
-          "error": 121.67,
-          "ciLower": 117.84
-        },
-        "nb": {
-          "error": 9.1,
-          "ciLower": 8.23
-        },
-        "ne": {
-          "error": 43.15,
-          "ciLower": 42.1
+          "error": 20.63,
+          "ciLower": 19.86
         },
         "nl": {
-          "error": 5.98,
-          "ciLower": 5.35
-        },
-        "oc": {
-          "error": 70.94,
-          "ciLower": 69.87
-        },
-        "pa": {
-          "error": 99.53,
-          "ciLower": 98.36
+          "error": 7.66,
+          "ciLower": 6.83
         },
         "pl": {
-          "error": 5.81,
-          "ciLower": 5.26
-        },
-        "ps": {
-          "error": 91.81,
-          "ciLower": 90.6
+          "error": 7.37,
+          "ciLower": 6.75
         },
         "pt": {
-          "error": 4.17,
-          "ciLower": 3.73
+          "error": 4.96,
+          "ciLower": 4.49
         },
         "ro": {
-          "error": 10.9,
-          "ciLower": 10.18
+          "error": 12.62,
+          "ciLower": 11.95
         },
         "ru": {
-          "error": 5.93,
-          "ciLower": 4.94
-        },
-        "sd": {
-          "error": 122.1,
-          "ciLower": 119.64
+          "error": 6.54,
+          "ciLower": 6.08
         },
         "sk": {
-          "error": 10.21,
-          "ciLower": 9.44
+          "error": 10.19,
+          "ciLower": 9.43
         },
         "sl": {
-          "error": 20.56,
-          "ciLower": 19.59
-        },
-        "sn": {
-          "error": 110.94,
-          "ciLower": 109.37
-        },
-        "so": {
-          "error": 101.29,
-          "ciLower": 99.86
-        },
-        "sr": {
-          "error": 32.36,
-          "ciLower": 29.53
+          "error": 24.3,
+          "ciLower": 23.22
         },
         "sv": {
-          "error": 8.72,
-          "ciLower": 8.12
-        },
-        "sw": {
-          "error": 33.96,
-          "ciLower": 32.53
-        },
-        "ta": {
-          "error": 27.41,
-          "ciLower": 26.29
-        },
-        "te": {
-          "error": 63.03,
-          "ciLower": 60.4
-        },
-        "tg": {
-          "error": 106.06,
-          "ciLower": 104.44
-        },
-        "th": {
-          "error": 13.15,
-          "ciLower": 12.45
-        },
-        "tr": {
-          "error": 6.97,
-          "ciLower": 6.33
+          "error": 15.25,
+          "ciLower": 14.38
         },
         "uk": {
-          "error": 7.31,
-          "ciLower": 6.72
-        },
-        "ur": {
-          "error": 23.19,
-          "ciLower": 21.92
-        },
-        "uz": {
-          "error": 102.52,
-          "ciLower": 101.45
-        },
-        "vi": {
-          "error": 9.48,
-          "ciLower": 8.85
-        },
-        "yo": {
-          "error": 99.38,
-          "ciLower": 98.13
-        },
-        "yue": {
-          "error": 34.62,
-          "ciLower": 33.41
-        },
-        "zh": {
-          "error": 8.5,
-          "ciLower": 7.65
+          "error": 6.84,
+          "ciLower": 6.25
         }
       },
       "performance": {
-        "accelerated": 3.095,
-        "cpu": 1.43
+        "accelerated": 25.065,
+        "cpu": 13.655
       }
     },
     "four04-base": {

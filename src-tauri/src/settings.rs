@@ -586,6 +586,8 @@ fn default_selected_language() -> String {
     // 404 is a French dictation app: pin the language instead of asking
     // Whisper to auto-detect on every utterance (detection is unreliable on
     // the short clips dictation produces, and French is the whole point).
+    // Parakeet V3 (the Ultra tier) detects the language itself and ignores
+    // this hint — French is one of its 25 supported languages.
     "fr".to_string()
 }
 
